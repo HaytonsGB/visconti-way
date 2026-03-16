@@ -473,20 +473,21 @@ footer .footer-copy{margin-top:20px;font-size:0.7rem;opacity:0.5}
   <div class="section-label">Get in Touch</div>
   <h2>Schedule a Private Showing</h2>
   <p style="color:rgba(255,255,255,0.65);font-size:0.9rem;line-height:1.8;margin-bottom:40px;max-width:420px;margin-left:auto;margin-right:auto;font-weight:300">Contact the owner directly. No agents, no runaround. We'll respond within 24 hours.</p>
-  <div class="form-wrap">
+  <form class="form-wrap" id="contact-form" action="https://formspree.io/f/xzdjjorl" method="POST">
     <label>Full Name</label>
-    <input type="text" id="name" placeholder="Your name" required>
+    <input type="text" name="name" placeholder="Your name" required>
     <label>Email</label>
-    <input type="email" id="email" placeholder="your@email.com" required>
+    <input type="email" name="email" placeholder="your@email.com" required>
     <label>Phone</label>
-    <input type="tel" id="phone" placeholder="(555) 123-4567">
+    <input type="tel" name="phone" placeholder="(555) 123-4567">
     <label>Preferred Date & Time</label>
-    <input type="text" id="datetime" placeholder="e.g. Saturday March 22 at 2pm">
+    <input type="text" name="preferred_datetime" placeholder="e.g. Saturday March 22 at 2pm">
     <label>Message (optional)</label>
-    <textarea id="message" placeholder="Any questions about the property?"></textarea>
-    <button class="cta-btn" onclick="submitForm()">Request Showing</button>
+    <textarea name="message" placeholder="Any questions about the property?"></textarea>
+    <input type="hidden" name="_subject" value="New Showing Request - 10997 SW Visconti Way">
+    <button type="submit" class="cta-btn">Request Showing</button>
     <p id="form-status" style="text-align:center;margin-top:16px;display:none"></p>
-  </div>
+  </form>
 </section>
 
 <!-- Footer -->
@@ -648,28 +649,38 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape'){document.getElementById('lightbox').classList.remove('active');document.body.style.overflow='';}
 });
 
-// ═══ Form ═══
-function submitForm(){
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const dt = document.getElementById('datetime').value.trim();
-  const msg = document.getElementById('message').value.trim();
-  if(!name || !email){
-    const s = document.getElementById('form-status');
-    s.textContent = 'Please enter your name and email.';
-    s.style.display = 'block';
-    s.style.color = '#ff6b6b';
-    return;
+// ═══ Form (Formspree) ═══
+document.getElementById('contact-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const form = e.target;
+  const status = document.getElementById('form-status');
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: {'Accept':'application/json'}
+    });
+    if(res.ok){
+      status.textContent = 'Thank you! We\'ll be in touch within 24 hours to confirm your showing.';
+      status.style.display = 'block';
+      status.style.color = '#a8e6cf';
+      form.reset();
+      btn.textContent = 'Sent!';
+      setTimeout(() => {btn.textContent = 'Request Showing'; btn.disabled = false;}, 3000);
+    } else {
+      throw new Error('Form submission failed');
+    }
+  } catch(err){
+    status.textContent = 'Something went wrong. Please email HaytonsGB@gmail.com directly.';
+    status.style.display = 'block';
+    status.style.color = '#ff6b6b';
+    btn.textContent = 'Request Showing';
+    btn.disabled = false;
   }
-  const subject = encodeURIComponent('Showing Request - 10997 SW Visconti Way');
-  const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nPreferred Time: ${dt}\nMessage: ${msg}`);
-  window.location.href = `mailto:HaytonsGB@gmail.com?subject=${subject}&body=${body}`;
-  const s = document.getElementById('form-status');
-  s.textContent = 'Opening your email client...';
-  s.style.display = 'block';
-  s.style.color = '#fff';
-}
+});
 
 // ═══ Scroll Reveal ═══
 const observer = new IntersectionObserver((entries) => {
