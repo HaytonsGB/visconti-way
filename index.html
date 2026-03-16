@@ -483,7 +483,7 @@ footer .footer-copy{margin-top:20px;font-size:0.7rem;opacity:0.5}
     <label>Phone</label>
     <input type="tel" name="phone" placeholder="(555) 123-4567">
     <label>Preferred Date</label>
-    <input type="date" name="preferred_date" required style="color-scheme:dark">
+    <input type="date" name="preferred_date" required style="color-scheme:dark" onchange="this.blur()">
     <label>Preferred Time</label>
     <select name="preferred_time" required>
       <option value="" disabled selected>Select a time</option>
